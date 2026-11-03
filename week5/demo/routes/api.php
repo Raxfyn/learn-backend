@@ -19,3 +19,14 @@ Route::get('/users', function () {
 
 Route::get('/users', [UserController::class, 'index']);
 Route::post('/users', [UserController::class, 'store']);
+
+//Route::post('/login', [UserController::class, 'login']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/profile', function (Request $request) {
+        return response()->json($request->user(), 200, [], JSON_UNESCAPED_UNICODE);
+    });
+});
+
+// 加一个假登录路由，只为让 auth 中间件不报错
+Route::post('/login', [UserController::class, 'login'])->name('login');
