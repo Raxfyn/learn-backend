@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreUserRequest;
 
 class UserController extends Controller
 {
@@ -12,10 +13,10 @@ class UserController extends Controller
         return response()->json(User::all(), 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validated = $request->validate(['name' => 'required|string|max:50']);
-        $user = User::create($validated);
+        //$validated = $request->validate(['name' => 'required|string|max:50']);
+        $user = User::create($request->validated());
         return response()->json($user, 201, [], JSON_UNESCAPED_UNICODE);
     }
 
