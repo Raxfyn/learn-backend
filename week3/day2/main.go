@@ -304,18 +304,20 @@ func main() {
 		refreshToken, _ := issueToken(1, "admin", 7*24*time.Hour) // 7 天
 
 		// Refresh Token 存 Cookie（httpOnly：JS 读不到，防 XSS）
-		//c.SetCookie("refresh_token", refreshToken, 7*24*3600, "/", "localhost", false, true)
-		cookie := &http.Cookie{
-			Name:     "refresh_token",
-			Value:    refreshToken,
-			Path:     "/",
-			Domain:   "localhost",
-			MaxAge:   7 * 24 * 3600,
-			HttpOnly: true,
-			Secure:   false,                   //开发环境用http，设为true会导致浏览器不存
-			SameSite: http.SameSiteStrictMode, //关键：禁止第三方网站带Cookie
-		}
-		http.SetCookie(c.Writer, cookie)
+		c.SetCookie("refresh_token", refreshToken, 7*24*3600, "/", "localhost", false, true)
+		/*
+			cookie := &http.Cookie{
+				Name:     "refresh_token",
+				Value:    refreshToken,
+				Path:     "/",
+				Domain:   "localhost",
+				MaxAge:   7 * 24 * 3600,
+				HttpOnly: true,
+				Secure:   false,                   //开发环境用http，设为true会导致浏览器不存
+				SameSite: http.SameSiteStrictMode, //关键：禁止第三方网站带Cookie
+			}
+			http.SetCookie(c.Writer, cookie)
+		*/
 
 		c.JSON(http.StatusOK, gin.H{"access_token": accessToken})
 	})
