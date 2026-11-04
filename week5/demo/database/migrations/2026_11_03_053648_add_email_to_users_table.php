@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('users', 'email')) {
+            return;     //已经加过（MYSQL 老库），直接跳过
+        }
+
         Schema::table('users', function (Blueprint $table) {
-            $table->string('email', 100)->nullable()->after('name');
+            $table->string('email', 100)->nullable();
         });
     }
 
