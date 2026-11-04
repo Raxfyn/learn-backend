@@ -9,7 +9,7 @@ class User extends Model
 {
     use HasApiTokens;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'email'];
 
     public $timestamps = false;
 }

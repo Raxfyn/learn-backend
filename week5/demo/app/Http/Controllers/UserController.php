@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
+use App\Jobs\SendWelcomeEmail;
+use App\Events\UserRegistered;
 
 class UserController extends Controller
 {
@@ -17,6 +19,11 @@ class UserController extends Controller
     {
         //$validated = $request->validate(['name' => 'required|string|max:50']);
         $user = User::create($request->validated());
+
+        UserRegistered::dispatch($user); //或者event(new UserRegistered($user));
+
+        //SendWelcomeEmail::dispatch($user);  //只写一行jobs记录，立刻返回
+
         return response()->json($user, 201, [], JSON_UNESCAPED_UNICODE);
     }
 
