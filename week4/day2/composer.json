@@ -1,0 +1,14 @@
+{
+    "name": "myzx-m1/week4-day2",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "MyZxM1\\Day2\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Raxfyn"
+        }
+    ]
+}
