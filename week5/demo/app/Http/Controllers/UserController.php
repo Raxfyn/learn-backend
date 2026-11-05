@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Requests\StoreUserRequest;
 use App\Jobs\SendWelcomeEmail;
 use App\Events\UserRegistered;
+use App\Http\Requests\LoginRequest;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -27,6 +29,25 @@ class UserController extends Controller
         return response()->json($user, 201, [], JSON_UNESCAPED_UNICODE);
     }
 
+    public function login(LoginRequest $request)
+    {
+        $data = $request->validated();
+
+        $user = User::where('email', $data['email'])->first();
+
+        // 三种失败统一成一句话：用户不存在 / 老用户没密码 / 密码不对
+        if (! $user || empty($user->password) || ! Hash::check($data['password'], $user->password)) {
+            return response()->json(['message' => '凭据不正确'], 401, [], JSON_UNESCAPED_UNICODE);
+        }
+
+        $token = $user->createToken('api')->plainTextToken;
+
+        return response()->json([
+            'token'      => $token,
+            'token_type' => 'Bearer',
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+    }
+    /*
     public function login(Request $request)
     {
         $validated = $request->validate(['name' => 'required|string|max:50']);
@@ -40,4 +61,5 @@ class UserController extends Controller
         $token = $user->createToken('api')->plainTextToken;
         return response()->json(['token' => $token, 'user_id' => $user->id], 200, [], JSON_UNESCAPED_UNICODE);
     }
+*/
 }

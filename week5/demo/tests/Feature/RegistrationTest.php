@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Hash;
 
 class RegistrationTest extends TestCase
 {
@@ -48,5 +49,27 @@ class RegistrationTest extends TestCase
         Queue::assertPushed(SendWelcomeEmail::class, function (SendWelcomeEmail $job) use ($user) {
             return $job->user->is($user);      // is() 比的是主键
         });
+    }
+
+    public function test_register_hashes_password_and_hides_it(): void
+    {
+        Event::fake([UserRegistered::class]);
+
+        $response = $this->postJson('/api/users', [
+            'name'      => '密码用户',
+            'email'     => 'pwd@test.com',
+            'password'  => 'secret123',
+        ]);
+
+        // ① 响应体里不能出现 password 字段
+        $response->assertCreated()->assertJsonMissingPath('password');
+
+        $user = User::where('email', 'pwd@test.com')->firstOrFail();
+
+        // ② 库里存的不是明文
+        $this->assertNotSame('secret123', $user->password);
+
+        // ③ 用 Hash::check 能校验通过
+        $this->assertTrue(Hash::check('secret123', $user->password));
     }
 }

@@ -19,4 +19,9 @@ class AuthTest extends TestCase
             ->getJson('/api/profile')
             ->assertUnauthorized();
     }
+
+    public function test_users_list_requires_authentication(): void
+    {
+        $this->getJson('/api/users')->assertUnauthorized();
+    }
 }
