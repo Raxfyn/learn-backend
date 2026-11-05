@@ -37,3 +37,16 @@
 - "An error occurred inside PHPUnit" = PHP 没加载成功，先 php -l
 
 //
+授权（Policy）
+- 认证解决"你是谁"(401)，授权解决"你能干啥"(403)，别混
+- 关卡顺序：auth(401) → 绑定(404) → authorize(403) → rules(422)
+- Policy 参数顺序：(当前用户, 目标对象)；$user->is($target) 比主键
+- Form Request 里用 Gate::allows()，$user->can() 需要 AuthorizesRequests trait
+- authorize() 在 rules() 之前执行，越权请求不浪费验证、不泄露字段
+- 管理员状态只能 forceFill/SQL 产生，$fillable + validated() 双重拦截
+- 删除前先 $user->tokens()->delete()，否则留孤儿 token
+- 唯一索引是最后防线，应用层验证是为了给用户 422 而不是 500
+- 测试：先断言前提（assertTrue($admin->is_admin)）再断言结果
+- 取库里真实值用 fresh()，内存实例不会自动同步
+
+//

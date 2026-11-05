@@ -17,6 +17,6 @@ class User extends Model
 
     protected function casts(): array   //赋值时自动哈希
     {
-        return ['password' => 'hashed'];
+        return ['password' => 'hashed', 'is_admin' => 'boolean'];
     }
 }

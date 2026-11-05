@@ -9,6 +9,8 @@ use App\Jobs\SendWelcomeEmail;
 use App\Events\UserRegistered;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Requests\UpdateUserRequest;
+use Illuminate\Support\Facades\Gate;
 
 class UserController extends Controller
 {
@@ -62,4 +64,20 @@ class UserController extends Controller
         return response()->json(['token' => $token, 'user_id' => $user->id], 200, [], JSON_UNESCAPED_UNICODE);
     }
 */
+    public function update(UpdateUserRequest $request, User $user)
+    {
+        $user->update($request->validated());
+
+        return response()->json($user, 200, [], JSON_UNESCAPED_UNICODE);
+    }
+
+    public function destroy(Request $request, User $user)
+    {
+        Gate::authorize('delete', $user);      // 拒绝时抛 AuthorizationException → 403
+
+        $user->tokens()->delete();             // 先撤销 token，别留孤儿
+        $user->delete();
+
+        return response()->json(null, 204);
+    }
 }

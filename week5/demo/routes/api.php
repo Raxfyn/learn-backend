@@ -10,13 +10,6 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 */
 
-/*
-Route::get('/users', function () {
-    $users = DB::table('users')->get();
-    return response()->json($users, 200, [], JSON_UNESCAPED_UNICODE);
-});
-*/
-
 //公开：注册 + 登陆
 Route::post('/users', [UserController::class, 'store']);
 Route::post('/login', [UserController::class, 'login'])->name('login');
@@ -38,7 +31,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         return response()->json(['message' => '已退出'], 200, [], JSON_UNESCAPED_UNICODE);
     });
+
+    Route::patch('/users/{user}', [UserController::class, 'update']);
+
+    Route::delete('/users/{user}', [UserController::class, 'destroy']);
 });
 
 // 加一个假登录路由，只为让 auth 中间件不报错
-Route::post('/login', [UserController::class, 'login'])->name('login');
+//Route::post('/login', [UserController::class, 'login'])->name('login');
