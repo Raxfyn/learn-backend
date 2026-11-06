@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\UserController;
 use App\Http\ApiResponse;
 use App\Http\Resources\UserResource;
+use App\Http\Controllers\PostController;
 
 //公开：注册 + 登陆
 Route::post('/users', [UserController::class, 'store']);
@@ -32,6 +33,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/users/{user}', [UserController::class, 'update']);
 
     Route::delete('/users/{user}', [UserController::class, 'destroy']);
+
+    Route::get('/posts', [PostController::class, 'index']);
+    Route::post('/posts', [PostController::class, 'store']);
+    Route::patch('/posts/{post}', [PostController::class, 'update']);
+    Route::delete('/posts/{post}', [PostController::class, 'destroy']);
+    Route::get('/users/{user}/posts', [PostController::class, 'indexForUser']);
 });
 
 // 加一个假登录路由，只为让 auth 中间件不报错

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Model
 {
@@ -18,5 +19,10 @@ class User extends Model
     protected function casts(): array   //赋值时自动哈希
     {
         return ['password' => 'hashed', 'is_admin' => 'boolean'];
+    }
+
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class);
     }
 }
