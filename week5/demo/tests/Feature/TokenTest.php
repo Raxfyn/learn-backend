@@ -24,7 +24,7 @@ class TokenTest extends TestCase
         return $this->postJson('/api/login', [
             'email'    => $email,
             'password' => 'secret123',
-        ])->json('token');
+        ])->json('data.token');
     }
 
     private function refreshAuth(): void
@@ -39,7 +39,7 @@ class TokenTest extends TestCase
         $this->withHeader('Authorization', 'Bearer ' . $this->token('a@test.com'))
             ->getJson('/api/profile')
             ->assertOk()
-            ->assertJsonPath('email', 'a@test.com');
+            ->assertJsonPath('data.email', 'a@test.com');
     }
 
     public function test_token_is_stored_hashed(): void
@@ -82,14 +82,14 @@ class TokenTest extends TestCase
 
         $this->withHeader('Authorization', 'Bearer ' . $this->token('d@test.com'))
             ->getJson('/api/profile')
-            ->assertJsonPath('email', 'd@test.com')
-            ->assertJsonMissingPath('password');
+            ->assertJsonPath('data.email', 'd@test.com')
+            ->assertJsonMissingPath('data.password');
 
         $this->refreshAuth();                      // ← 换身份前必须清
 
         $this->withHeader('Authorization', 'Bearer ' . $this->token('e@test.com'))
             ->getJson('/api/profile')
-            ->assertJsonPath('email', 'e@test.com');
+            ->assertJsonPath('data.email', 'e@test.com');
     }
 
     public function test_authenticated_user_can_list_users(): void
@@ -98,7 +98,12 @@ class TokenTest extends TestCase
 
         $this->withHeader('Authorization', 'Bearer ' . $this->token('list@test.com'))
             ->getJson('/api/users')
-            ->assertOk();
+            ->assertOk()
+            ->assertJsonStructure([
+                'data' => [
+                    ['id', 'name', 'email', 'is_admin'],
+                ],
+            ]);
     }
 
     /* 登出全部token测试

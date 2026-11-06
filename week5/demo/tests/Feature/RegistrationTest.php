@@ -26,7 +26,7 @@ class RegistrationTest extends TestCase
         ]);
 
         $response->assertCreated()
-            ->assertJsonPath('email', 'zhangsan@test.com');
+            ->assertJsonPath('data.email', 'zhangsan@test.com');
 
         $this->assertDatabaseHas('users', [
             'name'  => '张三',

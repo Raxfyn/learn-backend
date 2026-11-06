@@ -32,7 +32,7 @@ class UserUpdateTest extends TestCase
         return $this->postJson('/api/login', [
             'email'    => $email,
             'password' => 'secret123',
-        ])->json('token');
+        ])->json('data.token');
     }
 
     public function test_user_cannot_update_another_user(): void
@@ -71,7 +71,7 @@ class UserUpdateTest extends TestCase
         $this->withHeader('Authorization', 'Bearer ' . $this->token('alice@test.com'))
             ->patchJson("/api/users/{$alice->id}", ['name' => 'alice-new'])
             ->assertOk()
-            ->assertJsonPath('name', 'alice-new');
+            ->assertJsonPath('data.name', 'alice-new');
 
         $this->assertDatabaseHas('users', ['id' => $alice->id, 'name' => 'alice-new']);
     }

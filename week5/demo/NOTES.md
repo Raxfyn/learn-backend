@@ -7,6 +7,7 @@
 - Event 解耦：Controller 只喊事件，副作用靠 Listener 订阅
 - sync vs database：差值是"请求内同步做重活"的成本
 
+
 //
 测试
 - 测 API 一律 getJson/postJson（自动 Accept: application/json）
@@ -20,6 +21,7 @@
 - 迁移必须能从零重建（migrate:fresh 能过）
 - 补历史迁移的时间和顺序靠文件名，make:migration 不行
 - 加列前 hasColumn 守卫，建表前 hasTable 守卫
+
 
 //
 鉴权（Sanctum）
@@ -36,6 +38,7 @@
 - worker 是长驻进程，Job 里禁用 Auth::user()，用户必须显式传入
 - "An error occurred inside PHPUnit" = PHP 没加载成功，先 php -l
 
+
 //
 授权（Policy）
 - 认证解决"你是谁"(401)，授权解决"你能干啥"(403)，别混
@@ -48,5 +51,31 @@
 - 唯一索引是最后防线，应用层验证是为了给用户 422 而不是 500
 - 测试：先断言前提（assertTrue($admin->is_admin)）再断言结果
 - 取库里真实值用 fresh()，内存实例不会自动同步
+
+
+//
+### 响应结构（唯一出口 app/Http/ApiResponse.php）
+成功：{"data": ..., "message": "..."}
+失败：{"data": null, "message": "...", "errors": {...}}
+分页：{"data": [...], "meta": {current_page, per_page, total, last_page}, "message": "..."}
+
+### 状态码约定
+200 成功 / 201 创建成功 / 401 未认证 / 403 无权限 / 404 不存在 / 422 校验失败 / 429 限流
+删除用 200 + message（不用 204，因为 204 不能带响应体）
+
+### 三条规则
+1. 控制器里不写裸 response()->json()，只用 ApiResponse
+2. 输出字段只由 Resource 白名单决定；$hidden 是第二道防线
+3. 异常统一在 bootstrap/app.php 的 withExceptions 里转成同一结构
+
+### 踩过的坑
+- JsonResource 默认包一层 data → 自建统一响应时用 withoutWrapping()，否则 {data:{data:...}}
+- Handler::prepareException 会先翻译异常类型：
+  ModelNotFound → NotFoundHttpException，AuthorizationException → AccessDeniedHttpException
+  → 回调要接 HttpException，写 AuthorizationException 永远不触发
+- 回调 return null = 不接管，web 路由不受影响
+- 测试取值路径：JSON 用 data.token；数据库列用 token
+- assertJsonStructure 用嵌套数组，点号路径只给 assertJsonPath
+
 
 //

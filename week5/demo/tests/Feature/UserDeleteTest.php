@@ -30,7 +30,7 @@ class UserDeleteTest extends TestCase
         return $this->postJson('/api/login', [
             'email'    => $email,
             'password' => 'secret123',
-        ])->json('token');
+        ])->json('data.token');
     }
 
     public function test_guest_cannot_delete(): void
@@ -71,7 +71,8 @@ class UserDeleteTest extends TestCase
 
         $this->withHeader('Authorization', 'Bearer ' . $this->token('admin@test.com'))
             ->deleteJson("/api/users/{$bob->id}")
-            ->assertNoContent();               // 204
+            ->assertOK()
+            ->assertJsonPath('message', '已删除');               // 现在是200+ message
 
         $this->assertDatabaseMissing('users', ['id' => $bob->id]);
         $this->assertSame(0, $bob->tokens()->count());   // 孤儿 token 已清理

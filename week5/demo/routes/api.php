@@ -4,11 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\UserController;
-/*
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-*/
+use App\Http\ApiResponse;
+use App\Http\Resources\UserResource;
 
 //公开：注册 + 登陆
 Route::post('/users', [UserController::class, 'store']);
@@ -20,16 +17,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/users', [UserController::class, 'index']);
 
-    Route::get('/profile', function (Request $request) {
-        return response()->json($request->user(), 200, [], JSON_UNESCAPED_UNICODE);
-    });
+    Route::get('/profile', [UserController::class, 'profile']);
 
     //单端登出：只让当前这个token失效
     Route::post('/logout', function (Request $request) {
 
         $request->user()->currentAccessToken()->delete();
 
-        return response()->json(['message' => '已退出'], 200, [], JSON_UNESCAPED_UNICODE);
+        return ApiResponse::success(null, '已退出当前设备');
+
+        //return response()->json(['message' => '已退出'], 200, [], JSON_UNESCAPED_UNICODE);
     });
 
     Route::patch('/users/{user}', [UserController::class, 'update']);

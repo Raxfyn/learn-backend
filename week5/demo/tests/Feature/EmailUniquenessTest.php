@@ -42,7 +42,7 @@ class EmailUniquenessTest extends TestCase
         $token = $this->postJson('/api/login', [
             'email' => 'b@test.com',
             'password' => 'secret123',
-        ])->json('token');
+        ])->json('data.token');
 
         $this->withHeader('Authorization', 'Bearer ' . $token)
             ->patchJson("/api/users/{$bob->id}", ['email' => 'a@test.com'])
@@ -57,7 +57,7 @@ class EmailUniquenessTest extends TestCase
         $token = $this->postJson('/api/login', [
             'email' => 'c@test.com',
             'password' => 'secret123',
-        ])->json('token');
+        ])->json('data.token');
 
         $this->withHeader('Authorization', 'Bearer ' . $token)
             ->patchJson("/api/users/{$alice->id}", [

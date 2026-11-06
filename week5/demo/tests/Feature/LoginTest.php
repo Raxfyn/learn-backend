@@ -28,9 +28,9 @@ class LoginTest extends TestCase
             'password' => 'secret123',
         ]);
 
-        $response->assertOk()->assertJsonStructure(['token', 'token_type']);
+        $response->assertOk()->assertJsonStructure(['data' => ['token', 'token_type'], 'message']);
 
-        $this->assertNotEmpty($response->json('token'));
+        $this->assertNotEmpty($response->json('data.token'));
         $this->assertSame(1, $user->tokens()->count());
     }
 
@@ -41,7 +41,7 @@ class LoginTest extends TestCase
         $this->postJson('/api/login', [
             'email'    => 'zhangsan@test.com',
             'password' => 'wrong-password',
-        ])->assertStatus(401)->assertJsonMissingPath('token');
+        ])->assertStatus(401)->assertJsonMissingPath('data.token');
     }
 
     public function test_login_fails_with_unknown_email(): void
