@@ -21,7 +21,7 @@ class PostPolicy
      */
     public function view(User $user, Post $post): bool
     {
-        return false;
+        return $user->is($post->user) || $user->is_admin;
     }
 
     /**

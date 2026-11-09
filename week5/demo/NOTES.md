@@ -79,3 +79,31 @@
 
 
 //
+## Day 10 · 文件上传
+
+### 磁盘选择
+- public  → 封面/头像，storage:link 软链，可直接访问
+- local   → 私有文件（身份证、合同），不在 web 根，必须走控制器或签名 URL
+- s3      → 换 .env 即可，代码只认 Storage::disk()
+
+### 三条安全决策
+- 文件名必须重命名（hashName），绝不用 getClientOriginalName()：防路径穿越/双扩展名
+- 存储目录不可执行：文件在 storage/app/public，不在 public/
+- cover_path 不进 $fillable：路径只能服务端决定
+
+### 校验
+- image   → 读文件头判断真实内容（改名的 .php 过不去）
+- mimes   → 白名单扩展名
+- max:2048 → 单位 KB（2MB）
+
+### 孤儿文件
+- Post::deleting 事件里删文件：覆盖所有 Eloquent 删除路径
+- 数据库 cascade 不触发 Eloquent 事件 → 删用户时文件会残留 → 改为应用层逐篇删
+- 兜底：covers:prune 命令定期对账（文件系统不在事务里）
+
+### 私有文件访问
+- 本人访问：登录 + Policy + Storage::download()
+- 分享链接：URL::temporarySignedRoute + middleware('signed')
+
+
+//

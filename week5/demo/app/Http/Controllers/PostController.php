@@ -10,6 +10,7 @@ use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use Illuminate\Support\Facades\Gate;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 
 
 class PostController extends Controller
@@ -79,5 +80,32 @@ class PostController extends Controller
             ->paginate((int) $request->query('per_page', 15));
 
         return ApiResponse::paginated($posts, PostResource::class);
+    }
+
+    public function uploadCover(Request $request, Post $post)
+    {
+        Gate::authorize('update', $post);
+
+        $request->validate([
+            'cover' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        if ($post->cover_path) {
+            Storage::disk('public')->delete($post->cover_path);
+        }
+
+        $path = $request->file('cover')->store('covers/' . $post->id, 'public');
+
+        $post->cover_path = $path;
+        $post->save();
+
+        return ApiResponse::success(new PostResource($post), '封面已更新');
+    }
+
+    public function show(Request $request, Post $post)
+    {
+        Gate::authorize('view', $post);
+
+        return ApiResponse::success(new PostResource($post->load('user')));
     }
 }

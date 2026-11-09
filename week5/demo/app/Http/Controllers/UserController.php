@@ -75,6 +75,7 @@ class UserController extends Controller
         Gate::authorize('delete', $user);      // 拒绝时抛 AuthorizationException → 403
 
         $user->tokens()->delete();             // 先撤销 token，别留孤儿
+        $user->posts()->get()->each->delete();
         $user->delete();
 
         return ApiResponse::success(null, '已删除');

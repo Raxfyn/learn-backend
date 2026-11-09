@@ -39,6 +39,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/posts/{post}', [PostController::class, 'update']);
     Route::delete('/posts/{post}', [PostController::class, 'destroy']);
     Route::get('/users/{user}/posts', [PostController::class, 'indexForUser']);
+
+    Route::post('/posts/{post}/cover', [PostController::class, 'uploadCover']);
+    Route::get('/posts/{post}', [PostController::class, 'show']);
 });
 
 // 加一个假登录路由，只为让 auth 中间件不报错
