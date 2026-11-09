@@ -1,0 +1,54 @@
+services:
+  app:
+    build: .
+    volumes:
+      - .:/var/www/html
+    environment:
+      DB_HOST: host.docker.internal      # 覆盖 .env 里的 127.0.0.1
+      REDIS_HOST: redis
+      HOME: /tmp
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"                        # 避免和本地 artisan serve(8000) 冲突
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+
+  redis:
+    image: redis:7-alpine
+
+  worker:
+    build: .
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+    volumes:
+      - .:/var/www/html
+    environment:
+      DB_HOST: host.docker.internal
+      REDIS_HOST: redis
+      HOME: /tmp
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  scheduler:
+    build: .
+    command: php artisan schedule:work
+    volumes:
+      - .:/var/www/html
+    environment:
+      DB_HOST: host.docker.internal
+      REDIS_HOST: redis
+      HOME: /tmp
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
